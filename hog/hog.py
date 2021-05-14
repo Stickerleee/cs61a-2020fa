@@ -184,30 +184,24 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
-    # 闭包执行函数，执行一回合
-    def play_turn(strategy0, strategy1, score0, score1, dice, goal, say):
-        # 根据who，决定当前执行回合的玩家数据
+    # 执行回合直到其中一个玩家胜利
+    while score0<goal and score1<goal:
+        # 根据who，决定当前执行回合的玩家
         if who == 0:
             cur_strategy, cur_score, opponent_score = strategy0, score0, score1
         else:
             cur_strategy, cur_score, opponent_score = strategy1, score1, score0
         # 投骰子的结果
-        cur_score += take_turn(cur_strategy(cur_score,opponent_score),opponent_score,dice)
-        # 更新当前玩家分数
+        cur_score += take_turn(cur_strategy(cur_score, opponent_score), opponent_score, dice)
+        # 更新玩家分数
         if who == 0:
             score0 = cur_score
         else:
             score1 = cur_score
-        # 若胜利则直接返回值
-        if cur_score < goal:
-            # 执行额外回合
-            if extra_turn(cur_score,opponent_score):
-                return play_turn(strategy0, strategy1, score0, score1, dice, goal, say)
-        return score0, score1
-
-    # 执行回合直到其中一个玩家胜利
-    while score0<goal and score1<goal:
-        score0, score1 = play_turn(strategy0, strategy1, score0, score1, dice, goal, say)
+        # 执行额外回合
+        say = say(score0,score1)
+        if extra_turn(cur_score, opponent_score):
+            continue
         # 交换回合
         who = other(who)
     # END PROBLEM 5
@@ -224,13 +218,16 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
 
 
 def say_scores(score0, score1):
-    """A commentary function that announces the score for each player."""
+    """A commentary function that announces the score for each player.
+    报道分数；返回该函数
+    """
     print("Player 0 now has", score0, "and Player 1 now has", score1)
     return say_scores
 
 
 def announce_lead_changes(last_leader=None):
     """Return a commentary function that announces lead changes.
+    当反超时，报道分数；返回函数
 
     >>> f0 = announce_lead_changes()
     >>> f1 = f0(5, 0)
@@ -257,6 +254,7 @@ def announce_lead_changes(last_leader=None):
 
 def both(f, g):
     """Return a commentary function that says what f says, then what g says.
+    混合报道
 
     NOTE: the following game is not possible under the rules, it's just
     an example for the sake of the doctest
@@ -279,6 +277,7 @@ def both(f, g):
 def announce_highest(who, last_score=0, running_high=0):
     """Return a commentary function that announces when WHO's score
     increases by more than ever before in the game.
+    报道某玩家的历史最高单回合得分；返回一个函数
 
     NOTE: the following game is not possible under the rules, it's just
     an example for the sake of the doctest
@@ -298,6 +297,17 @@ def announce_highest(who, last_score=0, running_high=0):
     assert who == 0 or who == 1, 'The who argument should indicate a player.'
     # BEGIN PROBLEM 7
     "*** YOUR CODE HERE ***"
+    # 闭包函数
+    def announce_change(score0, score1):
+        nonlocal last_score, running_high
+        cur_score = score0 if who == 0 else score1
+        if (diff:=cur_score - last_score) > running_high:
+            print('{} point(s)! The most yet for Player {}'.format(diff, who))
+            return announce_highest(who,cur_score,diff)
+        # 返回新的闭包函数，每一步都可以复用
+        return announce_highest(who,cur_score,running_high)
+
+    return announce_change
     # END PROBLEM 7
 
 
@@ -327,6 +337,7 @@ def always_roll(n):
 def make_averaged(original_function, trials_count=1000):
     """Return a function that returns the average value of ORIGINAL_FUNCTION
     when called.
+    循环调用设定的函数，并求均值；返回一个函数
 
     To implement this function, you will have to use *args syntax, a new Python
     feature introduced in this project.  See the project description.
@@ -338,6 +349,15 @@ def make_averaged(original_function, trials_count=1000):
     """
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
+    def get_averaged(*args):
+        result = 0
+        for i in range(trials_count):
+            # 透传新的参数到original_function
+            result += original_function(*args)
+        return result / trials_count
+
+    return  get_averaged
+
     # END PROBLEM 8
 
 
