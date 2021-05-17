@@ -365,6 +365,8 @@ def max_scoring_num_rolls(dice=six_sided, trials_count=1000):
     """Return the number of dice (1 to 10) that gives the highest average turn
     score by calling roll_dice with the provided DICE over TRIALS_COUNT times.
     Assume that the dice always return positive outcomes.
+    执行策略：单次得分的最大期望值
+    调用（1到10个）dice骰子trials_count次，计算其均值，并返回取最大均值时的骰子数
 
     >>> dice = make_test_dice(1, 6)
     >>> max_scoring_num_rolls(dice)
@@ -372,6 +374,19 @@ def max_scoring_num_rolls(dice=six_sided, trials_count=1000):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    max_score = 0
+    result =0
+    # 分别取1到10个骰子
+    for i in range(1,11):
+        # total = 0
+        # for n in range(trials_count):
+        #     total += roll_dice(i, dice)
+        total = sum(roll_dice(i, dice) for n in range(trials_count))
+        if (new_score:=total/trials_count )> max_score:
+            # 找出最大均值
+            max_score = new_score
+            result = i
+    return result
     # END PROBLEM 9
 
 
@@ -419,9 +434,11 @@ def run_experiments():
 def bacon_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     """This strategy rolls 0 dice if that gives at least CUTOFF points, and
     rolls NUM_ROLLS otherwise.
+    执行策略：若使用Free Bacon规则的得分大于等于cutoff时，则使用该规则（返回0），否则返回num_rolls；
+    返回值：计划使用的骰子数目
     """
     # BEGIN PROBLEM 10
-    return 6  # Replace this statement
+    return 0 if free_bacon(opponent_score) >= cutoff else num_rolls
     # END PROBLEM 10
 
 
@@ -429,19 +446,41 @@ def extra_turn_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     """This strategy rolls 0 dice when it triggers an extra turn. It also
     rolls 0 dice if it gives at least CUTOFF points and does not give an extra turn.
     Otherwise, it rolls NUM_ROLLS.
+    执行策略：优先获取额外回合
+    若使用free_bacon规则能获取额外回合，则返回0；如不能获取额外回合，则使用bacon_strategy；
+    返回值：计划使用的骰子数目
     """
     # BEGIN PROBLEM 11
-    return 6  # Replace this statement
+    if extra_turn(free_bacon(opponent_score) + score, opponent_score):
+        return 0
+    else:
+        return bacon_strategy(score, opponent_score, cutoff, num_rolls)
     # END PROBLEM 11
 
 
 def final_strategy(score, opponent_score):
     """Write a brief description of your final strategy.
-
+    执行策略：
+    1.检测使用bacon能否直接获得胜利；
+    2.若分差为2，直接使用7个骰子；
+    3.优先获取额外回合；
+    4.若分差大于30，则使用7个骰子追赶；
+    5.令cutoff为max_scoring_num_rolls=7，执行bacon_strategy，获得较高的分数；
     *** YOUR DESCRIPTION HERE ***
     """
     # BEGIN PROBLEM 12
-    return 6  # Replace this statement
+    bacon = free_bacon(opponent_score)
+    cutoff = 8
+    num_rolls = 7
+    if score + bacon >= 100:
+        return 0
+    elif opponent_score - score == 2:
+        return 7
+    elif score - opponent_score >= 30:
+        return extra_turn_strategy(score,opponent_score,100,num_rolls)
+    else:
+        return extra_turn_strategy(score,opponent_score,cutoff,num_rolls)
+
     # END PROBLEM 12
 
 ##########################
