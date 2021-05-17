@@ -15,7 +15,7 @@ def lambda_curry2(func):
     3
     """
     "*** YOUR CODE HERE ***"
-    return ______
+    return lambda x : lambda y : func(x,y)
 
 
 
@@ -47,7 +47,12 @@ def count_cond(condition):
     8
     """
     "*** YOUR CODE HERE ***"
-
+    def count_something(num):
+        count = 0
+        for i in range(1,num+1):
+            if condition(num, i): count += 1
+        return count
+    return count_something
 
 
 def compose1(f, g):
@@ -82,10 +87,13 @@ def composite_identity(f, g):
     False
     """
     "*** YOUR CODE HERE ***"
+    # def func(num):
+    #     return compose1(f,g)(num) == compose1(g,f)(num)
+    return lambda num : compose1(f,g)(num) == compose1(g,f)(num)
 
 
 
-def cycle(f1, f2, f3):
+def cycle(f1,f2,f3):
     """Returns a function that is itself a higher-order function.
 
     >>> def add1(x):
@@ -112,4 +120,18 @@ def cycle(f1, f2, f3):
     19
     """
     "*** YOUR CODE HERE ***"
+    def func(times):
+        def runner(num):
+            nonlocal times
+            if times == 0:return num
+            cur = times%3
+            times -= 1
+            if cur==0:
+                return f3(runner(num))
+            elif cur==2:
+                return f2(runner(num))
+            else:
+                return f1(runner(num-1))
+        return runner
+    return func
 
