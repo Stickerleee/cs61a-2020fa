@@ -93,8 +93,9 @@ def composite_identity(f, g):
 
 
 
-def cycle(f1,f2,f3):
+def cycle(*args):
     """Returns a function that is itself a higher-order function.
+    改进版，任意多个参数函数的循环嵌套
 
     >>> def add1(x):
     ...     return x + 1
@@ -120,18 +121,16 @@ def cycle(f1,f2,f3):
     19
     """
     "*** YOUR CODE HERE ***"
+    # 入参长度
+    amount = len(args)
     def func(times):
         def runner(num):
             nonlocal times
             if times == 0:return num
-            cur = times%3
+            cur = times%amount
             times -= 1
-            if cur==0:
-                return f3(runner(num))
-            elif cur==2:
-                return f2(runner(num))
-            else:
-                return f1(runner(num-1))
+            # 根据余数选取对应函数
+            return args[cur-1](runner(num))
         return runner
     return func
 
