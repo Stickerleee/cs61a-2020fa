@@ -140,9 +140,34 @@ def shifty_shifts(start, goal, limit):
     """A diff function for autocorrect that determines how many letters
     in START need to be substituted to create GOAL, then adds the difference in
     their lengths.
+    从头开始比较两个字符串， 返回不相同的字符个数或字符数目之差；limit限制不相同的字符个数，当limit为0时结束迭代直接返回
     """
     # BEGIN PROBLEM 6
-    assert False, 'Remove this line'
+    # 根据index迭代
+    # if (diff_len:=len(goal) - len(start)) > 0:
+    #     short, long = start, goal
+    # else:
+    #     long, short = start, goal
+    # diff = 0
+    # for i in range(len(short)):
+    #     diff += 0 if short[i] == long[i] else 1
+    # return diff + abs(diff_len)
+
+    # 递归
+    # 相等快速通道
+    if start == goal:
+        return 0
+    elif limit<1 or not start or not goal:
+        # 结束迭代条件，字符串为空或limit为0
+        return max(len(goal), len(start))
+    else:
+        diff = 0
+        if start[0] != goal[0]:
+            # 比较首字符，若不同则limit-1并记录
+            limit -= 1
+            diff = 1
+        return diff + shifty_shifts(start[1:],goal[1:],limit)
+
     # END PROBLEM 6
 
 
