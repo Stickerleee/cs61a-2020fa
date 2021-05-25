@@ -137,6 +137,14 @@ class Player:
         """
         return self.play(random.randrange(len(self.hand)))
 
+    def discard(self):
+        """
+        随机弃一张卡
+        """
+        from random import randrange
+        self.hand.pop(randrange(0,len(self.hand)))
+
+
 ######################
 # Optional Questions #
 ######################
@@ -148,6 +156,7 @@ class TutorCard(Card):
         """
         Discard the first 3 cards in the opponent's hand and have
         them draw the same number of cards from their deck.
+        弃三抽三
         >>> from cards import *
         >>> player1, player2 = Player(player_deck, 'p1'), Player(opponent_deck, 'p2')
         >>> other_card = Card('other', 500, 500)
@@ -161,8 +170,14 @@ class TutorCard(Card):
         True
         """
         "*** YOUR CODE HERE ***"
-        #Uncomment the line below when you've finished implementing this method!
-        #print('{} discarded and re-drew 3 cards!'.format(opponent.name))
+        for _ in range(3):
+            opponent.discard()
+        for _ in range(3):
+            opponent.draw()
+        print('{} discarded and re-drew 3 cards!'.format(opponent.name))
+
+
+
 
     def copy(self):
         """
@@ -176,6 +191,7 @@ class TACard(Card):
     def effect(self, other_card, player, opponent):
         """
         Swap the attack and defense of an opponent's card.
+        卡牌效果：交换攻防
         >>> from cards import *
         >>> player1, player2 = Player(player_deck, 'p1'), Player(opponent_deck, 'p2')
         >>> other_card = Card('other', 300, 600)
@@ -187,6 +203,7 @@ class TACard(Card):
         300
         """
         "*** YOUR CODE HERE ***"
+        other_card.attack, other_card.defense = other_card.defense, other_card.attack
 
     def copy(self):
         """
@@ -203,6 +220,7 @@ class ProfessorCard(Card):
         all cards in the player's deck, then removes all cards
         in the opponent's deck that share an attack or defense
         stat with the opponent's card.
+        摧毁对手牌库中，与你的牌库中攻防相同的牌，并增加己方牌库中对应牌的攻防
         >>> test_card = Card('card', 300, 300)
         >>> professor_test = ProfessorCard('Professor', 500, 500)
         >>> opponent_card = test_card.copy()
@@ -217,10 +235,16 @@ class ProfessorCard(Card):
         """
         orig_opponent_deck_length = len(opponent.deck.cards)
         "*** YOUR CODE HERE ***"
+        for card in opponent.deck.cards.copy():
+            for card0 in player.deck.cards:
+                if card.attack == card0.attack and card.defense == card0.defense:
+                        opponent.deck.cards.remove(card)
+                        card0.attack += card.attack
+                        card0.defense += card.defense
+                        break
         discarded = orig_opponent_deck_length - len(opponent.deck.cards)
         if discarded:
-            #Uncomment the line below when you've finished implementing this method!
-            #print('{} cards were discarded from {}\'s deck!'.format(discarded, opponent.name))
+            print('{} cards were discarded from {}\'s deck!'.format(discarded, opponent.name))
             return
 
     def copy(self):

@@ -4,3 +4,6 @@
 'Player.__init__-correct', (1536, 70)
 'Player.draw-correct', (2048, 70)
 'Player.play-correct', (2560, 70)
+'TutorCard.effect-correct', (3072, 70)
+'TACard.effect-correct', (3584, 70)
+'ProfessorCard.effect-correct', (4096, 70)
